@@ -1,28 +1,48 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { useReducer } from 'react';
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
-  }
+import AddTodo from './components/AddTodo';
+import TodoList from './components/TodoList';
+
+let cachedTodos;
+
+if (window.localStorage.storageTestTodos) {
+  cachedTodos = JSON.parse(window.localStorage.getItem('storageTestTodos'));
+} else {
+  cachedTodos = [];
+}
+
+const App = ({ props }) => {
+
+  const [todos, dispatch] = useReducer((state, action) => {
+    switch (action.type) {
+      case 'add':
+        return [
+          ...state,
+          {
+            id: action.title,
+            title: action.title,
+            content: action.content
+          }
+        ];
+      case 'delete':
+        return state.filter(todo => {
+          return todo.id !== action.id;
+        })
+      default:
+        return state;
+    }
+  }, cachedTodos);
+
+  window.localStorage.setItem('storageTestTodos', JSON.stringify(todos.slice()));
+
+  return (
+    <div className="container">
+      <h1>Browser Storage Test</h1>
+      <AddTodo dispatch={dispatch} />
+      <TodoList todos={todos} dispatch={dispatch} />
+    </div>
+  );
 }
 
 export default App;
